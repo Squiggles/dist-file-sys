@@ -43,7 +43,7 @@ class FileSystem(object):
             f.close()
             print "Append @ " + path
         except IOError as e:
-            print "Append attempt on nonexistant file @ " + path"
+            print "Append attempt on nonexistant file @ " + path
             pass
 
 # Recursively builds dictionary of name to (serverID,path) pairs
@@ -59,6 +59,7 @@ def _listFiles(name,path):
             files = dict(files.items() + _listFiles(name,addr).items())
     return files
 
+#TODO: Build many systems according to configuration file
 name = sys.argv[1]
 filesystem = FileSystem(name)
 

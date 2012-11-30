@@ -3,14 +3,24 @@ import Pyro4
 class DirectoryService(object):
     files = {}
     
+    def getList(self):
+        filenames = []
+        for f in self.files:
+            filenames.append(f)
+        return filenames
+    
+    #TODO: Look at configfile for list of systems, search each one
     def buildDirectory(self):
-        filesystem = Pyro4.Proxy("PYRONAME:filesystem.luke")
+        filesystem = Pyro4.Proxy("PYRONAME:filesystem.robbie")
         self.files = filesystem.listFiles()
         print self.files
     
     def lookup(self,filename):
         print "Lookup for " + filename
-        return self.files[filename]
+        try:
+            return self.files[filename]
+        except KeyError as ke:
+            return (None,"File does not exist")
 
 directoryservice = DirectoryService()
 directoryservice.buildDirectory()
