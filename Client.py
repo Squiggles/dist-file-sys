@@ -20,7 +20,6 @@ def action():
             # the directory service
             (system,path) = directoryservice.lookup(filename)
             if not system == None:
-                print system
                 filesystem = Pyro4.Proxy(pname+system)              # Access file system
                 result = filesystem.readFile(path)                  # Read file from server
                 print "Read successful"

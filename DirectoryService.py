@@ -7,13 +7,14 @@ class DirectoryService(object):
         filenames = []
         for f in self.files:
             filenames.append(f)
+        print "Served file list"
         return filenames
     
-    #TODO: Look at configfile for list of systems, search each one
+    #TODO: Look at config file for list of systems, search each one
     def buildDirectory(self):
         filesystem = Pyro4.Proxy("PYRONAME:filesystem.robbie")
         self.files = filesystem.listFiles()
-        print self.files
+        for f in self.files.values(): print f
     
     def lookup(self,filename):
         print "Lookup for " + filename
