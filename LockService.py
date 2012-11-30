@@ -1,5 +1,11 @@
 import Pyro4
 
+#TODO:  Timeout? Tell FileSystem to reject client, wait for confirmation before unlocking again.
+#       Store system time with lock when taken. If lock requested by another client and difference
+#       with current time big enough, kick original lock guy. Need identity of locker?
+
+#TODO:  Should the file system check with the file server before allowing access?
+
 class LockService(object):
     locks = {}
     
@@ -19,6 +25,11 @@ class LockService(object):
             result = False
         for l in self.locks.items(): print l
         return result
+        
+    #TODO: Need identity to prevent foul play?
+    def releaseLock(self,f):
+        self.locks[f] = False
+        for l in self.locks.items(): print l
         
 lockservice = LockService()
 lockservice.getList()

@@ -4,8 +4,8 @@ import sys
 
 # Class representing the file system 
 class FileSystem(object):
-    path = "files/"
-    name = "Default"
+    path = "files/"             # each system has its own filestore
+    name = "default"
     
     def __init__(self,n):
         self.name = n
@@ -68,6 +68,5 @@ ns = Pyro4.locateNS()               # find name server
 uri = daemon.register(filesystem)   # register filesystem
 ns.register("filesystem."+name, uri)      # register with name in name server
 
-print "filesystem." + name
-print "Ready."
+print "filesystem." + name + " ready"
 daemon.requestLoop()                # wait
