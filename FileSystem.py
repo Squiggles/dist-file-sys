@@ -2,14 +2,20 @@ import Pyro4
 import os
 import sys
 
+import CurrentDirectory as CD
+
 # Class representing the file system 
 class FileSystem(object):
-    path = "files/"             # each system has its own filestore
-    name = "default"
     
     def __init__(self,n):
         self.name = n
-        self.path = n + self.path
+        self.path = n + "files/"
+        
+    
+        
+        
+    def buildDir(self):
+        return _buildDir(self.path)
 
     #listFiles::[String]
     def listFiles(self):
@@ -58,6 +64,19 @@ def _listFiles(name,path):
             # Recurse and integrate results with existing dictionary
             files = dict(files.items() + _listFiles(name,addr).items())
     return files
+    
+def _buildDir(path):
+    curry = CD.CurrentDirectory(path)
+        
+    for item in os.listdir(path):
+        addr = os.path.join(path,item)
+
+        if os.path.isfile(addr):
+            curry.addFile(item)
+        elif os.path.isdir(addr):
+            curry.addDir(_buildDir(path + item + "/"))
+                
+    return curry
 
 #TODO: Build many systems according to configuration file
 name = sys.argv[1]

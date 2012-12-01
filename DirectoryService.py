@@ -1,7 +1,11 @@
 import Pyro4
 
 class DirectoryService(object):
-    files = {}
+    
+    def show(self,path):
+        dirs = path.split('/')
+        for d in tokens:
+            self.directory
     
     def getList(self):
         filenames = []
@@ -15,6 +19,11 @@ class DirectoryService(object):
         filesystem = Pyro4.Proxy("PYRONAME:filesystem.robbie")
         self.files = filesystem.listFiles()
         for f in self.files.values(): print f
+        
+    def getDir(self):
+        filesystem = Pyro4.Proxy("PYRONAME:filesystem.robbie")
+        self.directory = filesystem.buildDir()
+        self.directory.toString()
     
     def lookup(self,filename):
         print "Lookup for " + filename
@@ -25,6 +34,7 @@ class DirectoryService(object):
 
 directoryservice = DirectoryService()
 directoryservice.buildDirectory()
+directoryservice.getDir()
 
 daemon = Pyro4.Daemon()                     # make Pyro daemon
 ns = Pyro4.locateNS()                       # find name server
