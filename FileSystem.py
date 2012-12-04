@@ -7,31 +7,34 @@ import CurrentDirectory as CD
 # Class representing the file system 
 class FileSystem(object):
     
+    # Each system has a name and a private directory
     def __init__(self,n):
         self.name = n
-        self.path = n + "files/"
+        self.path = n + 'files/'
         
     
         
-        
+    # Build a representative directory structure for the directory service
     def buildDir(self):
-        return _buildDir(self.path)
+        return _buildDir(self.name,self.path)
 
-    #listFiles::[String]
+    # Build a mapping between filename and (system,path)
     def listFiles(self):
-        print "Servicing request for file dictionary."
+        print 'Servicing request for file dictionary'
         return _listFiles(self.name,self.path)
-
+        
+    #TODO : Reimplement reading, writing etc
+"""
     # Read from the specified file and return the contents
     def readFile(self, path):
         try:
             f = open(path,'r')
             temp = f.read()
             f.close()
-            print "Read @ " + path + "."
+            print "Read @ " + path
             return temp
         except IOError as e:
-            print "Read attempt on nonexistant file @ " + path + "."
+            print "Read attempt on nonexistant file @ " + path
             pass
 
     # Create a new file or overwrite the previous, inserting the supplied text.
@@ -51,7 +54,7 @@ class FileSystem(object):
         except IOError as e:
             print "Append attempt on nonexistant file @ " + path
             pass
-
+"""
 # Recursively builds dictionary of name to (serverID,path) pairs
 def _listFiles(name,path):
     files = {}
@@ -64,9 +67,10 @@ def _listFiles(name,path):
             # Recurse and integrate results with existing dictionary
             files = dict(files.items() + _listFiles(name,addr).items())
     return files
-    
-def _buildDir(path):
-    curry = CD.CurrentDirectory(path)
+
+# Build a representative directory structure for the directory service
+def _buildDir(name,path):
+    curry = CD.CurrentDirectory(name,path)
         
     for item in os.listdir(path):
         addr = os.path.join(path,item)
@@ -74,18 +78,20 @@ def _buildDir(path):
         if os.path.isfile(addr):
             curry.addFile(item)
         elif os.path.isdir(addr):
-            curry.addDir(_buildDir(path + item + "/"))
+            curry.addDir(_buildDir(item, path + item + "/"))
                 
     return curry
 
-#TODO: Build many systems according to configuration file
-name = sys.argv[1]
-filesystem = FileSystem(name)
+coo = Pyro4.Proxy('PYRONAME:coordinator')
+systems = coo.getSystems()
 
+# Start servers
 daemon = Pyro4.Daemon()             # make Pyro daemon
 ns = Pyro4.locateNS()               # find name server
-uri = daemon.register(filesystem)   # register filesystem
-ns.register("filesystem."+name, uri)      # register with name in name server
+for fs in systems:
+    filesystem = FileSystem(fs)
+    uri = daemon.register(filesystem)       # register filesystem
+    ns.register('filesystem.'+fs, uri)      # register with name in name server
+    print 'filesystem.' + fs + ' ready'
 
-print "filesystem." + name + " ready"
 daemon.requestLoop()                # wait

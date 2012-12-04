@@ -6,6 +6,8 @@ import Pyro4
 
 #TODO:  Should the file system check with the file server before allowing access?
 
+#TODO:  This might all need to be drastically overhauled to fit in with the new system
+
 class LockService(object):
     locks = {}
     
@@ -36,8 +38,8 @@ lockservice.getList()
 
 daemon = Pyro4.Daemon()                     # make Pyro daemon
 ns = Pyro4.locateNS()                       # find name server
-uri = daemon.register(lockservice)      # register filesystem
-ns.register("lockservice", uri)         # register with name in name server
+uri = daemon.register(lockservice)          # register filesystem
+ns.register("lockservice", uri)             # register with name in name server
 
 print "Ready"
 daemon.requestLoop()                        # wait
