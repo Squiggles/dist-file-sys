@@ -20,6 +20,25 @@ pname = 'PYRONAME:filesystem.'
 directoryservice = Pyro4.Proxy('PYRONAME:directoryservice')     # Connect to directory service
 #lockservice = Pyro4.Proxy('PYRONAME:lockservice')               # Connect to lock service
 
+def fileInteract(path, fs):
+    cmd = ['']
+    index = 0
+    print 'interact mode'
+    while not quit(cmd[0]): 
+        cmd = raw_input().lower().split()
+        if len(cmd) == 0: cmd = '\n'
+
+        if cmd[0] == 'r':
+            print fs.readFile(path)
+        elif cmd[0] == '\n':
+            line = fs.readLine(path, index)
+            if line == -1:
+                print 'EOF'
+                index = 0;
+            else:
+                print line
+                index+=1
+
 def quit(option):
     return option == 'quit' or option == 'q'
 
@@ -38,19 +57,24 @@ while not quit(option):
             path += [command[1]]
             if len(path) == 1:
                 system = directoryservice.navigate(path).system
-                print system
+                filesystem = Pyro4.Proxy(pname+system)
+        else:
+            print "Directory doesn't exist"
+                
+    elif option == 'open' or option == 'o' and len(command) > 1:
+        fileInteract('/'.join(path +[command[1]]), filesystem)
   
     elif option == 'help' or option == 'h':
         print "I HAVE NO IDEA WHAT I'M DOING"
         
     elif option == 'read' or option == 'r' and len(command) > 1:
-        filesystem = Pyro4.Proxy(pname+system)              # Access file system
         print filesystem.readFile('/'.join(path +[command[1]]))                  # Read file from server
+        
     elif not quit(option):
         print 'Command not recognised, type h or help for assistance'
     
     # TODO: Redo most of this to fit in with new system 
-    """
+"""    
     elif command[0] == 'r':
         filename = getFilename()        # Get name of file from user
         # Get system name and path on that system from
@@ -88,4 +112,5 @@ while not quit(option):
             filesystem.appendFile(path,text)
             print 'Text appended to file'
         else: print path
-    """
+        
+        """

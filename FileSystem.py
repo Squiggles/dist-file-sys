@@ -39,7 +39,16 @@ class FileSystem(object):
         except IOError as e:
             print "Read attempt on nonexistant file @ " + path
             pass
-"""
+            
+    def readLine(self, path, i):
+        with open(path,'r') as f:
+            contents = f.read().split('\n')
+        print "Read @ " + path
+        if i < len(contents):
+            return contents[i]
+        else:
+            return -1
+
     # Create a new file or overwrite the previous, inserting the supplied text.
     def writeFile(self, path, text):
         f = open(path,'w+')
@@ -57,7 +66,7 @@ class FileSystem(object):
         except IOError as e:
             print "Append attempt on nonexistant file @ " + path
             pass
-"""
+
 # Recursively builds dictionary of name to (serverID,path) pairs
 def _listFiles(name,path):
     files = {}
