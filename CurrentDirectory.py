@@ -6,6 +6,7 @@ class CurrentDirectory(object):
         self.curries = []
         self.dirs = []
         self.files = []
+        self.toplevel = False
     
     def addFile(self, f):
         self.files.append(f)
@@ -16,7 +17,7 @@ class CurrentDirectory(object):
         self.curries.append(d)
         
     def toString(self):
-        result = self.name + '{\n' + str(self.files) 
+        result = self.name + '{\n\t' + str(self.files) 
         for curry in self.curries:
-            result += '\n' + curry.toString()
+            result += '\n\t' + curry.toString()
         return result + '\n}'

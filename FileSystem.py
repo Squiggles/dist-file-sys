@@ -9,22 +9,25 @@ class FileSystem(object):
     
     # Each system has a name and a private directory
     def __init__(self,n):
-        self.name = n
-        self.path = n + 'files/'
+        self.system = n
+        self.name = n + 'files'
+        self.path = self.name + '/'
         
     
         
     # Build a representative directory structure for the directory service
     def buildDir(self):
-        return _buildDir(self.name,self.path)
+        top = _buildDir(self.name,self.path)
+        top.system = self.system
+        return top
 
     # Build a mapping between filename and (system,path)
     def listFiles(self):
         print 'Servicing request for file dictionary'
-        return _listFiles(self.name,self.path)
+        return _listFiles(self.path,self.path)
         
     #TODO : Reimplement reading, writing etc
-"""
+
     # Read from the specified file and return the contents
     def readFile(self, path):
         try:
@@ -36,7 +39,7 @@ class FileSystem(object):
         except IOError as e:
             print "Read attempt on nonexistant file @ " + path
             pass
-
+"""
     # Create a new file or overwrite the previous, inserting the supplied text.
     def writeFile(self, path, text):
         f = open(path,'w+')

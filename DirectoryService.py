@@ -1,35 +1,45 @@
 import Pyro4
+import CurrentDirectory as CD
 
 class DirectoryService(object):
 
     def __init__(self):
-        self.getDir()
+        coo = Pyro4.Proxy('PYRONAME:coordinator')
+        curry = CD.CurrentDirectory('home','')
+        for system in coo.getSystems():
+            fs = Pyro4.Proxy("PYRONAME:filesystem." + system)
+            curry.addDir(fs.buildDir())
+        curry.toplevel = True
+        self.directory = curry
+        print self.directory.toString()
+        
+    def navigate(self,path):
+        if path == []: return self.directory
+        cd = self.directory
+        for d in path:
+            cd = self.changeDirectory(d, cd)
+        return cd
     
     # Shows contents of directory given by path
     def show(self,path):
-        dirs = path.split('/')
-        cd = self.directory
-        if path == '': return cd.dirs + cd.files
-        
-        for d in dirs:
-            cd = self.changeDirectory(d)
-         
+        cd = self.navigate(path)
         return  cd.dirs+cd.files
     
     # Checks if a directory exists before changing path in Client
-    def exists(self, name):
-        for n in self.directory.dirs:
+    def exists(self, name, path):
+        cd = self.navigate(path)
+        for n in cd.dirs:
             if n == name:
                 return True
         return False
     
     # Changes directory to specified if possible      
-    def changeDirectory(self,n):
-        for d in self.directory.curries:
+    def changeDirectory(self,n, cd):
+        for d in cd.curries:
             if d.name == n:
                 return d
         print 'No folder ' + n
-        return self
+        return  cd
     
     #return a list of all files
     def getList(self):
@@ -46,12 +56,7 @@ class DirectoryService(object):
         self.files = filesystem.listFiles()
         for f in self.files.values(): print f
     """
-    #TODO : Handle multiple file systems
-    # Retrieve directory from filesystem
-    def getDir(self):
-        filesystem = Pyro4.Proxy("PYRONAME:filesystem.robbie")
-        self.directory = filesystem.buildDir()
-        print self.directory.toString()
+        
     
     """
     # Return (system,path) for given filename

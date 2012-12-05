@@ -12,7 +12,8 @@ def attemptAction(filename):
 print 'HELLO, THIS IS CLIENT\n'
 
 option = ''        # User command
-path = ''
+path = []
+system = ''
 
 # Prefix of every filesystem registry address
 pname = 'PYRONAME:filesystem.'
@@ -24,24 +25,27 @@ def quit(option):
 
 #TODO: Read line by line in a loop, insert into different parts, handle failure
 while not quit(option):
-    command = raw_input('home'+path+': ').lower().split()
+    command = raw_input('/'.join(['home']+path)+': ').lower().split()
     option = command[0]
     
     if option == 'ls':
         print '\t'.join(directoryservice.show(path))
         
     elif option == 'cd' and len(command) > 1:
-        arg = command[1]
-        if arg == '..':
-            temp = path.split('/')      #seperate path tokens
-            del temp[len(temp)-1]       #delete last token
-            path = '/'.join(temp)       #rebuild path
-        elif directoryservice.exists(arg):
-            path += '/' + arg
+        if command[1] == '..':
+            del path[len(path)-1]
+        elif directoryservice.exists(command[1],path):
+            path += [command[1]]
+            if len(path) == 1:
+                system = directoryservice.navigate(path).system
+                print system
   
     elif option == 'help' or option == 'h':
         print "I HAVE NO IDEA WHAT I'M DOING"
         
+    elif option == 'read' or option == 'r' and len(command) > 1:
+        filesystem = Pyro4.Proxy(pname+system)              # Access file system
+        print filesystem.readFile('/'.join(path +[command[1]]))                  # Read file from server
     elif not quit(option):
         print 'Command not recognised, type h or help for assistance'
     
