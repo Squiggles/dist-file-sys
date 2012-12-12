@@ -1,25 +1,6 @@
 # saved as client.py
 import Pyro4
 
-def getFilename(): return raw_input('Filename: ').strip()
-def getText(): return raw_input('Text: ')
-
-def attemptAction(filename):
-    #lockservice = Pyro4.Proxy("PYRONAME:directoryservice")
-    return True
-    
-        
-print 'HELLO, THIS IS CLIENT\n'
-
-option = ''        # User command
-path = []
-system = ''
-
-# Prefix of every filesystem registry address
-pname = 'PYRONAME:filesystem.'
-directoryservice = Pyro4.Proxy('PYRONAME:directoryservice')     # Connect to directory service
-#lockservice = Pyro4.Proxy('PYRONAME:lockservice')               # Connect to lock service
-
 def fileInteract(path, fs):
     cmd = ['']
     index = 0
@@ -29,7 +10,7 @@ def fileInteract(path, fs):
         if len(cmd) == 0: cmd = '\n'
 
         if cmd[0] == 'r':
-            print fs.readFile(path)
+            print fs.readFile(path),
         elif cmd[0] == '\n':
             line = fs.readLine(path, index)
             if line == -1:
@@ -39,38 +20,70 @@ def fileInteract(path, fs):
                 print line
                 index+=1
 
-def quit(option):
-    return option == 'quit' or option == 'q'
+def quit(opt):
+    return opt == 'quit' or opt == 'q'
+    
+    
+# BEGIN PROGRAM #    
+    
+tokens = []         # Tokens representing filepath
+sys = ''            # Which system to connect to
+cmd = ['']          # User command
+
+pname = 'PYRONAME:filesystem.'                          # Prefix of every filesystem registry address
+dirserv = Pyro4.Proxy('PYRONAME:directoryservice')      # Connect to directory service
+lockserv = Pyro4.Proxy('PYRONAME:lockservice')          # Connect to lock service
+
+print 'HELLO, THIS IS CLIENT\n'
 
 #TODO: Read line by line in a loop, insert into different parts, handle failure
-while not quit(option):
-    command = raw_input('/'.join(['home']+path)+': ').lower().split()
-    option = command[0]
+while not quit(cmd[0]):
+    #path = '/'.join(tokens)
+    cmd = raw_input('/'.join(['home']+tokens)+': ').lower().split()
     
-    if option == 'ls':
-        print '\t'.join(directoryservice.show(path))
+    # View contents of current directory
+    if cmd[0] == 'ls':
+        print '\t'.join(dirserv.show(tokens))
         
-    elif option == 'cd' and len(command) > 1:
-        if command[1] == '..':
-            del path[len(path)-1]
-        elif directoryservice.exists(command[1],path):
-            path += [command[1]]
-            if len(path) == 1:
-                system = directoryservice.navigate(path).system
-                filesystem = Pyro4.Proxy(pname+system)
+    # Change directory
+    elif cmd[0] == 'cd' and len(cmd) > 1:
+        if cmd[1] == '..':
+            del tokens[len(tokens)-1]
+            if len(tokens) == 0:
+                sys = ''
+        elif dirserv.exists(cmd[1],tokens):
+            tokens += [cmd[1]]
+            if len(tokens) == 1:
+                sys = dirserv.navigate(tokens).system
+                filesystem = Pyro4.Proxy(pname+sys)
         else:
             print "Directory doesn't exist"
-                
-    elif option == 'open' or option == 'o' and len(command) > 1:
-        fileInteract('/'.join(path +[command[1]]), filesystem)
+    
+    # Open file in interactive mode        
+    elif cmd[0] == 'open' or cmd[0] == 'o' and len(cmd) > 1:
+        path = '/'.join(tokens +[cmd[1]])
+        if sys == '':
+            print 'Must first choose a filesystem'
+        elif lockserv.requestLock(path):
+            print path
+            fileInteract(path, filesystem)
+            lockserv.releaseLock(path)
+        else:
+            print 'File locked by another user'
+    
+    # Read contents of file
+    elif cmd[0] == 'read' or cmd[0] == 'r' and len(cmd) > 1:
+        if sys == '':
+            print 'Must first choose a filesystem'
+        else:
+            print filesystem.readFile('/'.join(tokens +[cmd[1]])) 
   
-    elif option == 'help' or option == 'h':
-        print "I HAVE NO IDEA WHAT I'M DOING"
-        
-    elif option == 'read' or option == 'r' and len(command) > 1:
-        print filesystem.readFile('/'.join(path +[command[1]]))                  # Read file from server
-        
-    elif not quit(option):
+    # View help
+    elif cmd[0] == 'help' or cmd[0] == 'h':
+        print 'I HAVE NO IDEA WHAT I\'M DOING'
+    
+    # Command not recognised    
+    elif not quit(cmd[0]):
         print 'Command not recognised, type h or help for assistance'
     
     # TODO: Redo most of this to fit in with new system 

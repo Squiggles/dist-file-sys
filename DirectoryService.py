@@ -42,12 +42,25 @@ class DirectoryService(object):
         return  cd
     
     #return a list of all files
-    def getList(self):
+    def getPaths(self):
+        print '\nBuilding list of all filepaths for locking service:'
+        return getPaths_(self.directory,[])
+            
+def getPaths_(cd,paths):
+    for f in cd.files:
+        print cd.path+f
+        paths.append(cd.path+f)
+    for c in cd.curries:
+        paths = getPaths_(c, paths)
+    return paths
+    """
         filenames = []
         for f in self.files:
             filenames.append(f)
         print "Served file list"
         return filenames
+    """
+    
     """
     #TODO: Look at config file for list of systems, search each one
     # End up with mapping from names to (system,path)

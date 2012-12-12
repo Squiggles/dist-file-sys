@@ -13,9 +13,11 @@ class LockService(object):
     
     def getList(self):
         directoryservice = Pyro4.Proxy("PYRONAME:directoryservice")
-        files = directoryservice.getList()
-        for f in files: self.locks[f] = False
-        for l in self.locks.items(): print l
+        paths = directoryservice.getPaths()
+        print 'Received list of filepaths from directory service'
+        for p in paths: 
+            print p
+            self.locks[p] = False
     
     def requestLock(self,f):
         if self.locks[f] == False:

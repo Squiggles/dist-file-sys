@@ -32,22 +32,24 @@ class FileSystem(object):
     def readFile(self, path):
         try:
             f = open(path,'r')
-            temp = f.read()
-            f.close()
             print "Read @ " + path
-            return temp
+            return f.read()
         except IOError as e:
-            print "Read attempt on nonexistant file @ " + path
-            pass
+            print 'Read attempt on nonexistant file @ ' + path
+            return 'ERROR: file doesn\'t exist'
             
     def readLine(self, path, i):
-        with open(path,'r') as f:
+        try:
+            f = open(path,'r')
             contents = f.read().split('\n')
-        print "Read @ " + path
-        if i < len(contents):
-            return contents[i]
-        else:
-            return -1
+            print "Read @ " + path
+            if i < len(contents):
+                return contents[i]
+            else:
+                return -1
+        except IOError as e:
+            print 'Read attempt on nonexistant file @ ' + path
+            return 'ERROR: file doesn\'t exist'
 
     # Create a new file or overwrite the previous, inserting the supplied text.
     def writeFile(self, path, text):
