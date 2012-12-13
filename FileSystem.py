@@ -13,8 +13,6 @@ class FileSystem(object):
         self.name = n + 'files'
         self.path = self.name + '/'
         
-    
-        
     # Build a representative directory structure for the directory service
     def buildDir(self):
         top = _buildDir(self.name,self.path)
@@ -64,7 +62,7 @@ class FileSystem(object):
     def appendFile(self, path, text):
         try:
             f = open(path, 'a')
-            f.write(text)
+            f.write('\n' + text)
             f.close()
             print "Append @ " + path
         except IOError as e:

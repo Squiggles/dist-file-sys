@@ -2,6 +2,7 @@
 import Pyro4
 import time
 
+#TODO:  Caching?
 def fileInteract(path, fs):
     cmd = ['']
     index = 0
@@ -70,19 +71,18 @@ while not quit(cmd[0]):
             print "Directory doesn't exist"
     
     # Open file in interactive mode        
-    elif cmd[0] == 'open' or cmd[0] == 'o' and len(cmd) > 1:
+    elif (cmd[0] == 'open' or cmd[0] == 'o') and len(cmd) > 1:
         path = '/'.join(tokens +[cmd[1]])
         if sys == '':
             print 'Must first choose a filesystem'
         elif lockserv.requestLock(path):
-            print path
             fileInteract(path, filesystem)
             lockserv.releaseLock(path)
         else:
             print 'File locked by another user'
     
     # Read contents of file
-    elif cmd[0] == 'read' or cmd[0] == 'r' and len(cmd) > 1:
+    elif (cmd[0] == 'read' or cmd[0] == 'r') and len(cmd) > 1:
         path = '/'.join(tokens +[cmd[1]])
         if sys == '':
             print 'Must first choose a filesystem'
@@ -90,7 +90,36 @@ while not quit(cmd[0]):
             cacheInsert(path, cache, filesystem)
         if path in cache:
             print cache[path][0]
-  
+    
+    #TODO:  Write to cache
+    elif (cmd[0] == 'w' or cmd[0] == 'write') and len(cmd) > 1:
+        path = '/'.join(tokens +[cmd[1]])
+        if sys == '':
+            print 'Must first choose a filesystem'
+        elif lockserv.requestLock(path):
+            text = raw_input()
+            filesystem.writeFile(path,text)
+            dirserv.timeUpdate(path)
+            dirserv.refresh()
+            print 'Write successful'
+            lockserv.releaseLock(path)
+        else:
+            print 'File locked by another user'
+    
+    #TODO:  Write to cache
+    elif (cmd[0] == 'a' or cmd[0] == 'append') and len(cmd) > 1:
+        path = '/'.join(tokens +[cmd[1]])
+        if sys == '':
+            print 'Must first choose a filesystem'
+        elif lockserv.requestLock(path):
+            text = raw_input()
+            filesystem.appendFile(path,text)
+            dirserv.timeUpdate(path)
+            print 'Append successful'
+            lockserv.releaseLock(path)
+        else:
+            print 'File locked by another user'
+    
     # View help
     elif cmd[0] == 'help' or cmd[0] == 'h':
         print 'I HAVE NO IDEA WHAT I\'M DOING'
@@ -120,28 +149,7 @@ while not quit(cmd[0]):
             result = filesystem.readFile(path)                  # Read file from server
             print 'Read successful'
             print result
-    elif command[0] == 'w':
-        filename = getFilename()
-        text = getText()
-        
-        (system,path) = directoryservice.lookup(filename)
-        
-        if not system == None:
-            filesystem = Pyro4.Proxy(pname+system)
-            filesystem.writeFile(path,text)
-            print 'Write successful'
-        else:
-            print path
-    elif command[0] == 'a':
-        filename = getFilename()
-        text = getText()
-        
-        (system,path) = directoryservice.lookup(filename)
-        
-        if not system == None:
-            filesystem = Pyro4.Proxy(pname+system)
-            filesystem.appendFile(path,text)
-            print 'Text appended to file'
-        else: print path
+    
+    
         
         """

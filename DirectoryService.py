@@ -5,18 +5,21 @@ import CurrentDirectory as CD
 class DirectoryService(object):
 
     def __init__(self):
+        self.timemap = {}   #map from paths to time accessed
+        self.refresh()
+    
+    def refresh(self):
         coo = Pyro4.Proxy('PYRONAME:coordinator')
         curry = CD.CurrentDirectory('home','')
         for system in coo.getSystems():
             fs = Pyro4.Proxy('PYRONAME:filesystem.' + system)
             curry.addDir(fs.buildDir())
-        curry.toplevel = True
         self.directory = curry
         print self.directory.toString()
         
-        self.timemap = {}   #map from paths to time accessed
         for p in self.getPaths():
-            self.timemap[p] = time.time()
+            if p not in self.timemap:
+                self.timemap[p] = time.time()
         
         print 'Timestamps:'
         for i in self.timemap.items():
@@ -56,7 +59,10 @@ class DirectoryService(object):
         return getPaths_(self.directory,[])
         
     def timeAccessed(self,path):
-        return timemap[path]
+        return self.timemap[path]
+        
+    def timeUpdate(self, path):
+        self.timemap[path] = time.time()
             
 def getPaths_(cd,paths):
     for f in cd.files:
@@ -65,33 +71,7 @@ def getPaths_(cd,paths):
     for c in cd.curries:
         paths = getPaths_(c, paths)
     return paths
-    """
-        filenames = []
-        for f in self.files:
-            filenames.append(f)
-        print "Served file list"
-        return filenames
-    """
     
-    """
-    #TODO: Look at config file for list of systems, search each one
-    # End up with mapping from names to (system,path)
-    def buildDirectory(self):
-        filesystem = Pyro4.Proxy("PYRONAME:filesystem.robbie")
-        self.files = filesystem.listFiles()
-        for f in self.files.values(): print f
-    """
-        
-    
-    """
-    # Return (system,path) for given filename
-    def lookup(self,filename):
-        print "Lookup for " + filename
-        try:
-            return self.files[filename]
-        except KeyError as ke:
-            return (None,"File does not exist")
-    """
 directoryservice = DirectoryService()
 #directoryservice.buildDirectory()
 

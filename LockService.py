@@ -23,6 +23,8 @@ class LockService(object):
             self.locks[p] = False
     
     def requestLock(self,f):
+        if f not in self.locks:
+            return True
         if self.locks[f] == False:
             self.locks[f] = True
             print f + " locked"
