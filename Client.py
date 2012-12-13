@@ -1,5 +1,6 @@
 # saved as client.py
 import Pyro4
+import time
 
 def fileInteract(path, fs):
     cmd = ['']
@@ -20,6 +21,14 @@ def fileInteract(path, fs):
                 print line
                 index+=1
 
+#TODO: Limit size of cache
+def cacheInsert(path,cache,fs):
+    f = fs.readFile(path)
+    if f == None:
+        print "File doesn't exist"
+    else:
+        cache[path] = fs.readFile(path),time.time()
+
 def quit(opt):
     return opt == 'quit' or opt == 'q'
     
@@ -29,6 +38,7 @@ def quit(opt):
 tokens = []         # Tokens representing filepath
 sys = ''            # Which system to connect to
 cmd = ['']          # User command
+cache = {}          # Mapping from path to a tuple of contents and timestamp
 
 pname = 'PYRONAME:filesystem.'                          # Prefix of every filesystem registry address
 dirserv = Pyro4.Proxy('PYRONAME:directoryservice')      # Connect to directory service
@@ -73,14 +83,22 @@ while not quit(cmd[0]):
     
     # Read contents of file
     elif cmd[0] == 'read' or cmd[0] == 'r' and len(cmd) > 1:
+        path = '/'.join(tokens +[cmd[1]])
         if sys == '':
             print 'Must first choose a filesystem'
-        else:
-            print filesystem.readFile('/'.join(tokens +[cmd[1]])) 
+        elif path not in cache or cache[path][1] < dirserv.timeAccessed(path):
+            cacheInsert(path, cache, filesystem)
+        if path in cache:
+            print cache[path][0]
   
     # View help
     elif cmd[0] == 'help' or cmd[0] == 'h':
         print 'I HAVE NO IDEA WHAT I\'M DOING'
+    
+    # Debug info
+    elif cmd[0] == 'd':
+        for c in cache.items():
+            print c
     
     # Command not recognised    
     elif not quit(cmd[0]):

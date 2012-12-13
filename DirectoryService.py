@@ -1,4 +1,5 @@
 import Pyro4
+import time
 import CurrentDirectory as CD
 
 class DirectoryService(object):
@@ -7,11 +8,19 @@ class DirectoryService(object):
         coo = Pyro4.Proxy('PYRONAME:coordinator')
         curry = CD.CurrentDirectory('home','')
         for system in coo.getSystems():
-            fs = Pyro4.Proxy("PYRONAME:filesystem." + system)
+            fs = Pyro4.Proxy('PYRONAME:filesystem.' + system)
             curry.addDir(fs.buildDir())
         curry.toplevel = True
         self.directory = curry
         print self.directory.toString()
+        
+        self.timemap = {}   #map from paths to time accessed
+        for p in self.getPaths():
+            self.timemap[p] = time.time()
+        
+        print 'Timestamps:'
+        for i in self.timemap.items():
+            print i
         
     def navigate(self,path):
         if path == []: return self.directory
@@ -45,6 +54,9 @@ class DirectoryService(object):
     def getPaths(self):
         print '\nBuilding list of all filepaths for locking service:'
         return getPaths_(self.directory,[])
+        
+    def timeAccessed(self,path):
+        return timemap[path]
             
 def getPaths_(cd,paths):
     for f in cd.files:

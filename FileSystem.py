@@ -36,7 +36,8 @@ class FileSystem(object):
             return f.read()
         except IOError as e:
             print 'Read attempt on nonexistant file @ ' + path
-            return 'ERROR: file doesn\'t exist'
+            #return 'ERROR: file doesn\'t exist'
+            return None
             
     def readLine(self, path, i):
         try:
@@ -46,10 +47,11 @@ class FileSystem(object):
             if i < len(contents):
                 return contents[i]
             else:
-                return -1
+                return None
         except IOError as e:
             print 'Read attempt on nonexistant file @ ' + path
-            return 'ERROR: file doesn\'t exist'
+            return None
+            #return 'ERROR: file doesn\'t exist'
 
     # Create a new file or overwrite the previous, inserting the supplied text.
     def writeFile(self, path, text):
@@ -67,7 +69,8 @@ class FileSystem(object):
             print "Append @ " + path
         except IOError as e:
             print "Append attempt on nonexistant file @ " + path
-            pass
+            return None
+            #return 'ERROR: file doesn\'t exist'
 
 # Recursively builds dictionary of name to (serverID,path) pairs
 def _listFiles(name,path):

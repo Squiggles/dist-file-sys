@@ -1,7 +1,7 @@
 import Pyro4
 
 # Checks configuration file for servers and reports this to directory service
-# and file system starter
+# and file system manager
 class Coordinator(object):
     def __init__(self):
         handle = open('config.txt', 'r')
@@ -12,7 +12,8 @@ class Coordinator(object):
     def getSystems(self):
         print 'System list request'
         return self.systems
-        
+
+#function to asist filtering out empty values from a list
 def removeEmpty(x):
     return not x == ''
         

@@ -1,20 +1,19 @@
 class CurrentDirectory(object):
     
     def __init__(self,n,p):
-        self.path = p
-        self.name = n
-        self.curries = []
-        self.dirs = []
-        self.files = []
-        self.toplevel = False
+        self.path = p           # Path to current directory
+        self.name = n           # Name of current directory
+        self.curries = []       # Subdirectory structures
+        self.dirs = []          # Names of subdirectories
+        self.files = []         # Filenames
     
     def addFile(self, f):
         self.files.append(f)
         
     def addDir(self, d):
-        self.dirs.append(d.name)
+        self.dirs.append(d.name)    # Just the names of the subdirectories
         print d.name
-        self.curries.append(d)
+        self.curries.append(d)      # Recursive subdirectory structures
         
     def toString(self):
         result = self.name + '{\n\t' + str(self.files) 

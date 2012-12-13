@@ -9,8 +9,11 @@ import Pyro4
 #TODO:  This might all need to be drastically overhauled to fit in with the new system
 
 class LockService(object):
-    locks = {}
     
+    def __init__(self):
+        self.locks = {}
+    
+    #locks is a dictionary mapping paths to bools
     def getList(self):
         directoryservice = Pyro4.Proxy("PYRONAME:directoryservice")
         paths = directoryservice.getPaths()
