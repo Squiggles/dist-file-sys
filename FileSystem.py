@@ -12,6 +12,10 @@ class FileSystem(object):
         self.system = n
         self.name = n + 'files'
         self.path = self.name + '/'
+        if not n == 'backup':
+            self.backup = Pyro4.Proxy("PYRONAME:filesystem.backup")
+            self.bpath = 'backupfiles/'
+            print n + ' reporting!'
         
     # Build a representative directory structure for the directory service
     def buildDir(self):
@@ -23,8 +27,6 @@ class FileSystem(object):
     def listFiles(self):
         print 'Servicing request for file dictionary'
         return _listFiles(self.path,self.path)
-        
-    #TODO : Reimplement reading, writing etc
 
     # Read from the specified file and return the contents
     def readFile(self, path):
@@ -49,10 +51,12 @@ class FileSystem(object):
         except IOError as e:
             print 'Read attempt on nonexistant file @ ' + path
             return None
-            #return 'ERROR: file doesn\'t exist'
 
+    #TODO: tell replicator to write backup
     # Create a new file or overwrite the previous, inserting the supplied text.
     def writeFile(self, path, text):
+        if not self.system == 'backup':
+            self.backup.writeFile(self.bpath+path,text)
         f = open(path,'w+')
         f.write(text)
         f.close()
@@ -61,6 +65,8 @@ class FileSystem(object):
     # Append text to the end of the specified file
     def appendFile(self, path, text):
         try:
+            if not system == 'backup':
+                self.backup.writeFile(bpath.self+path,text)
             f = open(path, 'a')
             f.write('\n' + text)
             f.close()
@@ -68,7 +74,6 @@ class FileSystem(object):
         except IOError as e:
             print "Append attempt on nonexistant file @ " + path
             return None
-            #return 'ERROR: file doesn\'t exist'
 
 # Recursively builds dictionary of name to (serverID,path) pairs
 def _listFiles(name,path):
@@ -99,6 +104,7 @@ def _buildDir(name,path):
 
 coo = Pyro4.Proxy('PYRONAME:coordinator')
 systems = coo.getSystems()
+systems.insert(0,'backup')
 
 # Start servers
 daemon = Pyro4.Daemon()             # make Pyro daemon
@@ -108,5 +114,6 @@ for fs in systems:
     uri = daemon.register(filesystem)       # register filesystem
     ns.register('filesystem.'+fs, uri)      # register with name in name server
     print 'filesystem.' + fs + ' ready'
+
 
 daemon.requestLoop()                # wait

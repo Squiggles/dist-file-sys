@@ -108,7 +108,8 @@ while not quit(cmd[0]):
         elif lockserv.requestLock(path):
             text = raw_input()
             filesystem.writeFile(path,text)
-            del cache[path]
+            if path in cache:
+                del cache[path]
             dirserv.timeUpdate(path)
             dirserv.refresh()
             print 'Write successful'
@@ -123,7 +124,8 @@ while not quit(cmd[0]):
         elif lockserv.requestLock(path):
             text = raw_input()
             filesystem.appendFile(path,text)
-            del cache[path]
+            if path in cache:
+                del cache[path]
             dirserv.timeUpdate(path)
             print 'Append successful'
             lockserv.releaseLock(path)
