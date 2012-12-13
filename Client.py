@@ -28,6 +28,12 @@ def cacheInsert(path,cache,fs):
     if f == None:
         print "File doesn't exist"
     else:
+        if len(cache) > 2:
+            lru = ('',('',time.time()))
+            for pair in cache.items():
+                if pair[1][1] < lru[1][1]:
+                    lru = pair
+            del cache[lru[0]]
         cache[path] = fs.readFile(path),time.time()
 
 def quit(opt):
@@ -59,7 +65,11 @@ while not quit(cmd[0]):
     # Change directory
     elif cmd[0] == 'cd' and len(cmd) > 1:
         if cmd[1] == '..':
-            del tokens[len(tokens)-1]
+            if len(tokens) == 0:
+                print 'Can\'t go higher than root directory'
+            else:
+                del tokens[len(tokens)-1]
+                
             if len(tokens) == 0:
                 sys = ''
         elif dirserv.exists(cmd[1],tokens):
@@ -91,7 +101,6 @@ while not quit(cmd[0]):
         if path in cache:
             print cache[path][0]
     
-    #TODO:  Write to cache
     elif (cmd[0] == 'w' or cmd[0] == 'write') and len(cmd) > 1:
         path = '/'.join(tokens +[cmd[1]])
         if sys == '':
@@ -99,6 +108,7 @@ while not quit(cmd[0]):
         elif lockserv.requestLock(path):
             text = raw_input()
             filesystem.writeFile(path,text)
+            del cache[path]
             dirserv.timeUpdate(path)
             dirserv.refresh()
             print 'Write successful'
@@ -106,7 +116,6 @@ while not quit(cmd[0]):
         else:
             print 'File locked by another user'
     
-    #TODO:  Write to cache
     elif (cmd[0] == 'a' or cmd[0] == 'append') and len(cmd) > 1:
         path = '/'.join(tokens +[cmd[1]])
         if sys == '':
@@ -114,6 +123,7 @@ while not quit(cmd[0]):
         elif lockserv.requestLock(path):
             text = raw_input()
             filesystem.appendFile(path,text)
+            del cache[path]
             dirserv.timeUpdate(path)
             print 'Append successful'
             lockserv.releaseLock(path)
