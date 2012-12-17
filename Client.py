@@ -15,14 +15,13 @@ def fileInteract(path, fs):
             print fs.readFile(path),
         elif cmd[0] == '\n':
             line = fs.readLine(path, index)
-            if line == -1:
+            if line == None:
                 print 'EOF'
                 index = 0;
             else:
                 print line
                 index+=1
 
-#TODO: Limit size of cache
 def cacheInsert(path,cache,fs):
     f = fs.readFile(path)
     if f == None:
@@ -144,24 +143,3 @@ while not quit(cmd[0]):
     # Command not recognised    
     elif not quit(cmd[0]):
         print 'Command not recognised, type h or help for assistance'
-    
-    # TODO: Redo most of this to fit in with new system 
-"""    
-    elif command[0] == 'r':
-        filename = getFilename()        # Get name of file from user
-        # Get system name and path on that system from
-        # the directory service
-        (system,path) = directoryservice.lookup(filename)
-        
-        if system == None: print path  #contains error message
-        elif not lockservice.requestLock(filename): print 
-        else:
-            
-            filesystem = Pyro4.Proxy(pname+system)              # Access file system
-            result = filesystem.readFile(path)                  # Read file from server
-            print 'Read successful'
-            print result
-    
-    
-        
-        """

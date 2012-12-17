@@ -73,7 +73,6 @@ def getPaths_(cd,paths):
     return paths
     
 directoryservice = DirectoryService()
-#directoryservice.buildDirectory()
 
 daemon = Pyro4.Daemon()                     # make Pyro daemon
 ns = Pyro4.locateNS()                       # find name server

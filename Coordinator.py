@@ -30,4 +30,3 @@ for s in coo.systems:
 print message
 print 'Ready'
 daemon.requestLoop()                        # wait
-

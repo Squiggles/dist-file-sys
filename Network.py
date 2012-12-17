@@ -52,7 +52,6 @@ class FileSystem(object):
             print 'Read attempt on nonexistant file @ ' + path
             return None
 
-    #TODO: tell replicator to write backup
     # Create a new file or overwrite the previous, inserting the supplied text.
     def writeFile(self, path, text):
         if not self.system == 'backup':
@@ -65,8 +64,8 @@ class FileSystem(object):
     # Append text to the end of the specified file
     def appendFile(self, path, text):
         try:
-            if not system == 'backup':
-                self.backup.writeFile(bpath.self+path,text)
+            if not self.system == 'backup':
+                self.backup.appendFile(self.bpath+path,text)
             f = open(path, 'a')
             f.write('\n' + text)
             f.close()
@@ -98,8 +97,7 @@ def _buildDir(name,path):
         if os.path.isfile(addr):
             curry.addFile(item)
         elif os.path.isdir(addr):
-            curry.addDir(_buildDir(item, path + item + "/"))
-                
+            curry.addDir(_buildDir(item, path + item + "/"))            
     return curry
 
 coo = Pyro4.Proxy('PYRONAME:coordinator')
@@ -114,6 +112,5 @@ for fs in systems:
     uri = daemon.register(filesystem)       # register filesystem
     ns.register('filesystem.'+fs, uri)      # register with name in name server
     print 'filesystem.' + fs + ' ready'
-
 
 daemon.requestLoop()                # wait
